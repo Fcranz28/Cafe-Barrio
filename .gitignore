@@ -1,0 +1,50 @@
+HELP.md
+target/
+.mvn/wrapper/maven-wrapper.jar
+!**/src/main/**/target/
+!**/src/test/**/target/
+
+### STS ###
+.apt_generated
+.classpath
+.factorypath
+.project
+.settings
+.springBeans
+.sts4-cache
+
+### IntelliJ IDEA ###
+.idea
+*.iws
+*.iml
+*.ipr
+
+### NetBeans ###
+/nbproject/private/
+/nbbuild/
+/dist/
+/nbdist/
+/.nb-gradle/
+build/
+!**/src/main/**/build/
+!**/src/test/**/build/
+
+### VS Code ###
+.vscode/
+
+# Local configuration and frontend build artifacts
+src/main/resources/application-local.properties
+frontend/node_modules/
+frontend/dist/
+frontend/.angular/
+.env
+.env.*
+!.env.example
+tmp/
+
+# Dependencies, test output, logs and operating-system files
+node_modules/
+coverage/
+*.log
+.DS_Store
+Thumbs.db

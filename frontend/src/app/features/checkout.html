@@ -1,0 +1,128 @@
+<section class="container-page py-12">
+  <a routerLink="/carrito" class="text-sm text-coffee">← Volver al carrito</a>
+  <p class="eyebrow mt-8">El último paso</p>
+  <h1 class="section-title mt-3">Completa tu pedido.</h1>
+  @if (!cart.items().length && !confirmed()) {
+    <div class="panel mt-8 p-8">
+      <p>Tu carrito está vacío.</p>
+      <a routerLink="/catalogo" class="btn mt-5">Explorar catálogo</a>
+    </div>
+  } @else if (!confirmed()) {
+    <form
+      [formGroup]="form"
+      (ngSubmit)="submit()"
+      class="mt-8 grid items-start gap-8 lg:grid-cols-[1fr_380px]"
+    >
+      <fieldset class="panel p-6 sm:p-8" [disabled]="busy()">
+        <h2 class="text-2xl">Datos de entrega</h2>
+        <p class="mt-2 text-sm text-espresso/60">Cuéntanos a quién y dónde entregar el pedido.</p>
+        <div class="mt-6">
+          <label for="customerName" class="label">Nombre completo</label>
+          <input
+            id="customerName"
+            formControlName="customerName"
+            autocomplete="name"
+            maxlength="120"
+            class="field"
+            [attr.aria-invalid]="invalid('customerName')"
+            aria-describedby="name-error"
+            placeholder="Tu nombre y apellido"
+          />
+          @if (invalid('customerName')) {
+            <p id="name-error" class="mt-2 text-xs text-red-700">
+              Ingresa tu nombre, hasta 120 caracteres.
+            </p>
+          }
+        </div>
+        <div class="mt-5">
+          <label for="phone" class="label">Celular</label>
+          <input
+            id="phone"
+            formControlName="phone"
+            type="tel"
+            autocomplete="tel"
+            maxlength="20"
+            class="field"
+            [attr.aria-invalid]="invalid('phone')"
+            aria-describedby="phone-error"
+            placeholder="987 654 321"
+          />
+          @if (invalid('phone')) {
+            <p id="phone-error" class="mt-2 text-xs text-red-700">Ingresa un celular válido.</p>
+          }
+        </div>
+        <div class="mt-5">
+          <label for="address" class="label">Dirección de entrega</label>
+          <textarea
+            id="address"
+            formControlName="address"
+            autocomplete="street-address"
+            rows="3"
+            maxlength="300"
+            class="field"
+            [attr.aria-invalid]="invalid('address')"
+            aria-describedby="address-error"
+            placeholder="Calle, número, distrito y referencia"
+          ></textarea>
+          @if (invalid('address')) {
+            <p id="address-error" class="mt-2 text-xs text-red-700">
+              Ingresa tu dirección, hasta 300 caracteres.
+            </p>
+          }
+        </div>
+      </fieldset>
+      <aside class="panel p-6">
+        <h2 class="text-2xl">Tu pedido</h2>
+        <div class="mt-5 space-y-4">
+          @for (i of cart.items(); track i.product.id) {
+            <div class="flex justify-between gap-4 text-sm">
+              <span>{{ i.quantity }} × {{ i.product.name }}</span>
+              <span class="whitespace-nowrap">{{
+                i.quantity * i.product.price | currency: 'PEN' : 'S/ '
+              }}</span>
+            </div>
+          }
+        </div>
+        <div class="mt-6 flex justify-between border-t border-line pt-5 text-lg font-semibold">
+          <span>Total</span><span>{{ cart.total() | currency: 'PEN' : 'S/ ' }}</span>
+        </div>
+        <p class="mt-4 text-xs leading-5 text-espresso/60">
+          Al confirmar registraremos tu pedido para su preparación. No se cobrará ningún importe en
+          esta página.
+        </p>
+        @if (error()) {
+          <div role="alert" class="notice mt-4">{{ error() }}</div>
+        }
+        <button class="btn mt-6 w-full" [disabled]="busy()">
+          {{ busy() ? 'Registrando pedido…' : 'Confirmar pedido →' }}
+        </button>
+      </aside>
+    </form>
+  }
+</section>
+<dialog
+  #confirmation
+  (cancel)="close()"
+  aria-labelledby="confirmation-title"
+  class="m-auto w-[calc(100%-2rem)] max-w-md rounded-3xl border border-line bg-paper p-8 text-center text-espresso shadow-2xl backdrop:bg-espresso/50"
+>
+  @if (confirmed(); as order) {
+    <div
+      class="mx-auto flex h-16 w-16 items-center justify-center rounded-full bg-[#e5ecdf] text-3xl text-[#526345]"
+      aria-hidden="true"
+    >
+      ✓
+    </div>
+    <p class="eyebrow mt-6">Gracias por elegirnos</p>
+    <h2 id="confirmation-title" class="mt-3 text-3xl">¡Pedido registrado!</h2>
+    <p class="mt-4 text-sm leading-6 text-espresso/65">
+      Tu pedido <strong>#{{ order.id }}</strong> está pendiente de preparación.
+    </p>
+    <div class="my-6 rounded-xl bg-cream p-4">
+      <p class="text-xs text-coffee">Total registrado</p>
+      <p class="mt-1 text-2xl font-semibold">{{ order.total | currency: 'PEN' : 'S/ ' }}</p>
+    </div>
+    <p class="mb-6 text-xs text-espresso/60">No se ha realizado un pago en línea.</p>
+    <button autofocus class="btn w-full" (click)="close()">Seguir comprando ↗</button>
+  }
+</dialog>

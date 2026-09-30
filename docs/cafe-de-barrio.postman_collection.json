@@ -1,0 +1,330 @@
+{
+  "info": {
+    "name": "Café de Barrio",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+    "description": "Ejecuta CSRF antes de mutaciones, y otra vez después de login/logout. Postman conserva cookies. Cambia requestKey por otro UUID para registrar otra compra; mantenlo para reintentar la misma. Las peticiones de mantenimiento modifican el catálogo local."
+  },
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "http://localhost:8080"
+    },
+    {
+      "key": "csrf",
+      "value": ""
+    },
+    {
+      "key": "productId",
+      "value": "1"
+    },
+    {
+      "key": "orderId",
+      "value": "2"
+    },
+    {
+      "key": "requestKey",
+      "value": "8c702a25-c487-4611-9950-72611d4c4e31"
+    },
+    {
+      "key": "adminUser",
+      "value": "admin"
+    },
+    {
+      "key": "adminPassword",
+      "value": "barrio-demo-2026"
+    }
+  ],
+  "item": [
+    {
+      "name": "01 · CSRF",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": "{{baseUrl}}/api/auth/csrf"
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"CSRF disponible\", () => pm.response.to.have.status(200));",
+              "pm.collectionVariables.set(\"csrf\", pm.response.json().token);"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "02 · Categorías",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": "{{baseUrl}}/api/categorias"
+      }
+    },
+    {
+      "name": "03 · Catálogo",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": "{{baseUrl}}/api/productos?page=0&size=12"
+      }
+    },
+    {
+      "name": "04 · Filtrar categoría",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": "{{baseUrl}}/api/productos?categoria=1&disponible=true&page=0&size=12"
+      }
+    },
+    {
+      "name": "05 · Detalle de producto",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": "{{baseUrl}}/api/productos/{{productId}}"
+      }
+    },
+    {
+      "name": "06 · Registrar pedido sin pago",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "X-XSRF-TOKEN",
+            "value": "{{csrf}}"
+          },
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          },
+          {
+            "key": "Idempotency-Key",
+            "value": "{{requestKey}}"
+          }
+        ],
+        "url": "{{baseUrl}}/api/pedidos",
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"customerName\": \"Pedido de prueba API\",\n  \"phone\": \"999999999\",\n  \"address\": \"Dirección de demostración\",\n  \"items\": [\n    {\n      \"productId\": 1,\n      \"quantity\": 1\n    }\n  ]\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"Pedido registrado\", () => pm.response.to.have.status(201));",
+              "if (pm.response.code === 201) pm.collectionVariables.set(\"orderId\", pm.response.json().id);"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "07 · Login (perfil demo)",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "X-XSRF-TOKEN",
+            "value": "{{csrf}}"
+          }
+        ],
+        "url": "{{baseUrl}}/api/auth/login",
+        "body": {
+          "mode": "urlencoded",
+          "urlencoded": [
+            {
+              "key": "username",
+              "value": "{{adminUser}}",
+              "type": "text"
+            },
+            {
+              "key": "password",
+              "value": "{{adminPassword}}",
+              "type": "text"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "name": "08 · Renovar CSRF después del login",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": "{{baseUrl}}/api/auth/csrf"
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"CSRF disponible\", () => pm.response.to.have.status(200));",
+              "pm.collectionVariables.set(\"csrf\", pm.response.json().token);"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "09 · Sesión actual",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": "{{baseUrl}}/api/auth/me"
+      }
+    },
+    {
+      "name": "10 · Productos administrativos",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": "{{baseUrl}}/api/admin/productos?page=0&size=20"
+      }
+    },
+    {
+      "name": "11 · Crear producto",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "X-XSRF-TOKEN",
+            "value": "{{csrf}}"
+          },
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": "{{baseUrl}}/api/admin/productos",
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"name\": \"Café edición especial\",\n  \"description\": \"Café en grano de 250 g.\",\n  \"price\": 35.5,\n  \"stock\": 10,\n  \"imageUrl\": \"/images/coffee.svg\",\n  \"categoryId\": 1,\n  \"active\": true\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        }
+      }
+    },
+    {
+      "name": "12 · Editar producto",
+      "request": {
+        "method": "PUT",
+        "header": [
+          {
+            "key": "X-XSRF-TOKEN",
+            "value": "{{csrf}}"
+          },
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": "{{baseUrl}}/api/admin/productos/{{productId}}",
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"name\": \"Café edición especial\",\n  \"description\": \"Café en grano de 250 g.\",\n  \"price\": 35.5,\n  \"stock\": 10,\n  \"imageUrl\": \"/images/coffee.svg\",\n  \"categoryId\": 1,\n  \"active\": true\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        }
+      }
+    },
+    {
+      "name": "13 · Desactivar producto",
+      "request": {
+        "method": "PATCH",
+        "header": [
+          {
+            "key": "X-XSRF-TOKEN",
+            "value": "{{csrf}}"
+          },
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": "{{baseUrl}}/api/admin/productos/{{productId}}/activo",
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"active\": false\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        }
+      }
+    },
+    {
+      "name": "14 · Pedidos",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": "{{baseUrl}}/api/admin/pedidos?page=0&size=20"
+      }
+    },
+    {
+      "name": "15 · Detalle de pedido",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": "{{baseUrl}}/api/admin/pedidos/{{orderId}}"
+      }
+    },
+    {
+      "name": "16 · Cambiar estado",
+      "request": {
+        "method": "PATCH",
+        "header": [
+          {
+            "key": "X-XSRF-TOKEN",
+            "value": "{{csrf}}"
+          },
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": "{{baseUrl}}/api/admin/pedidos/{{orderId}}/estado",
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"status\": \"EN_PREPARACION\"\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        }
+      }
+    },
+    {
+      "name": "17 · Logout",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "X-XSRF-TOKEN",
+            "value": "{{csrf}}"
+          }
+        ],
+        "url": "{{baseUrl}}/api/auth/logout"
+      }
+    }
+  ]
+}

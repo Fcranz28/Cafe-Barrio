@@ -1,0 +1,107 @@
+@import 'tailwindcss';
+@theme {
+  --color-cream: #f7f2eb;
+  --color-paper: #fffcf8;
+  --color-espresso: #2c1b13;
+  --color-coffee: #75452d;
+  --color-caramel: #c58b57;
+  --color-line: #e5d8ca;
+  --font-display: Georgia, 'Times New Roman', serif;
+  --font-sans: 'Segoe UI', Arial, sans-serif;
+}
+@layer base {
+  body {
+    @apply bg-cream text-espresso font-sans antialiased;
+  }
+  h1,
+  h2,
+  h3 {
+    @apply font-display;
+  }
+  button,
+  a,
+  input,
+  select,
+  textarea {
+    @apply outline-offset-4;
+  }
+  button,
+  a {
+    -webkit-tap-highlight-color: transparent;
+  }
+  button:not(:disabled) {
+    cursor: pointer;
+  }
+  button:disabled {
+    cursor: not-allowed;
+  }
+  ::selection {
+    background: #e6cbb3;
+  }
+}
+@layer components {
+  .container-page {
+    @apply mx-auto w-full max-w-7xl px-5 sm:px-8 lg:px-12;
+  }
+  .eyebrow {
+    @apply text-[11px] font-semibold uppercase tracking-[0.2em] text-coffee;
+  }
+  .btn {
+    @apply inline-flex min-h-11 items-center justify-center gap-2 rounded-full bg-coffee px-6 py-3 text-sm font-semibold text-white transition-colors hover:bg-espresso disabled:opacity-50;
+  }
+  .btn-outline {
+    @apply inline-flex min-h-11 items-center justify-center gap-2 rounded-full border border-line bg-transparent px-6 py-3 text-sm font-semibold transition-colors hover:bg-paper disabled:opacity-50;
+  }
+  .field {
+    @apply w-full rounded-xl border border-line bg-paper px-4 py-3 text-sm focus:border-coffee focus:ring-1 focus:ring-coffee;
+  }
+  .label {
+    @apply mb-2 block text-sm font-medium;
+  }
+  .notice {
+    @apply rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-800;
+  }
+  .panel {
+    @apply rounded-2xl border border-line bg-paper;
+  }
+  .section-title {
+    @apply font-display text-3xl tracking-tight md:text-4xl;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    scroll-behavior: auto !important;
+    transition: none !important;
+    animation: none !important;
+  }
+}
+
+html:has(.cart-drawer[open]) {
+  overflow: hidden;
+}
+.cart-drawer {
+  position: fixed;
+  inset: 0 0 0 auto;
+  margin: 0 0 0 auto;
+  width: min(100%, 460px);
+  max-width: 100%;
+  height: 100dvh;
+  max-height: 100dvh;
+  padding: 0;
+  border: 0;
+  background: var(--color-cream);
+  color: var(--color-espresso);
+  box-shadow: -12px 0 48px #2c1b1326;
+}
+.cart-drawer[open] {
+  animation: cart-drawer-enter 220ms ease-out;
+}
+.cart-drawer::backdrop {
+  background: #2c1b1380;
+}
+@keyframes cart-drawer-enter {
+  from { transform: translateX(100%); }
+  to { transform: translateX(0); }
+}

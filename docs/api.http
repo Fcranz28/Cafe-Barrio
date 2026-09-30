@@ -1,0 +1,85 @@
+@base = http://localhost:8080
+@username = admin
+@password = barrio-demo-2026
+@productId = 1
+@orderId = 2
+# Mantén la clave para repetir la misma compra; cambia el UUID para una compra nueva.
+@requestKey = 8c702a25-c487-4611-9950-72611d4c4e31
+
+### Obtener CSRF (IntelliJ HTTP Client conserva las cookies)
+GET {{base}}/api/auth/csrf
+
+> {% client.global.set("csrf", response.body.token); %}
+
+### Catálogo público
+GET {{base}}/api/productos?categoria=1&disponible=true&page=0&size=12
+
+### Categorías
+GET {{base}}/api/categorias
+
+### Detalle
+GET {{base}}/api/productos/{{productId}}
+
+### Compra sin pago (ejecutar CSRF antes)
+POST {{base}}/api/pedidos
+Content-Type: application/json
+X-XSRF-TOKEN: {{csrf}}
+Idempotency-Key: {{requestKey}}
+
+{"customerName":"Pedido de prueba API","phone":"999999999","address":"Dirección de demostración","items":[{"productId":{{productId}},"quantity":1}]}
+
+### Login administrativo
+POST {{base}}/api/auth/login
+Content-Type: application/x-www-form-urlencoded
+X-XSRF-TOKEN: {{csrf}}
+
+username={{username}}&password={{password}}
+
+### Renovar CSRF después del login
+GET {{base}}/api/auth/csrf
+
+> {% client.global.set("csrf", response.body.token); %}
+
+### Sesión
+GET {{base}}/api/auth/me
+
+### Productos administrativos
+GET {{base}}/api/admin/productos?page=0&size=20
+
+### Crear producto
+POST {{base}}/api/admin/productos
+Content-Type: application/json
+X-XSRF-TOKEN: {{csrf}}
+
+{"name":"Café edición especial","description":"Café en grano de 250 g.","price":35.50,"stock":10,"imageUrl":"/images/coffee.svg","categoryId":1,"active":true}
+
+### Editar producto
+PUT {{base}}/api/admin/productos/{{productId}}
+Content-Type: application/json
+X-XSRF-TOKEN: {{csrf}}
+
+{"name":"Café de origen · Cusco","description":"Bolsa de café en grano de 250 g.","price":28.00,"stock":24,"imageUrl":"/images/coffee.svg","categoryId":1,"active":true}
+
+### Desactivar producto
+PATCH {{base}}/api/admin/productos/{{productId}}/activo
+Content-Type: application/json
+X-XSRF-TOKEN: {{csrf}}
+
+{"active":false}
+
+### Listar pedidos
+GET {{base}}/api/admin/pedidos?estado=PENDIENTE&page=0&size=20
+
+### Detalle de pedido
+GET {{base}}/api/admin/pedidos/{{orderId}}
+
+### Avanzar estado
+PATCH {{base}}/api/admin/pedidos/{{orderId}}/estado
+Content-Type: application/json
+X-XSRF-TOKEN: {{csrf}}
+
+{"status":"EN_PREPARACION"}
+
+### Cerrar sesión
+POST {{base}}/api/auth/logout
+X-XSRF-TOKEN: {{csrf}}
