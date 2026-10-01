@@ -17,10 +17,10 @@ public final class ApiDtos {
         @NotNull @Min(0) @Max(1000000) Integer stock,
         @Size(max=1000) @Pattern(regexp="^(https://[^\\s]+|/images/[a-zA-Z0-9._-]+|)$", message="Usa una URL HTTPS o una imagen local") String imageUrl,
         @NotNull @Positive Long categoryId, boolean active) {}
-    public record ProductView(Long id, String name, String description, BigDecimal price,
+    public record ProductView(Long id, String publicId, String name, String description, BigDecimal price,
         Integer stock, String imageUrl, boolean active, CategoryView category) {
         public static ProductView of(Product p) {
-            return new ProductView(p.getId(), p.getName(), p.getDescription(), p.getPrice(), p.getStock(),
+            return new ProductView(p.getId(), p.getPublicId(), p.getName(), p.getDescription(), p.getPrice(), p.getStock(),
                 p.getImageUrl(), p.isActive(), new CategoryView(p.getCategory().getId(), p.getCategory().getName()));
         }
     }

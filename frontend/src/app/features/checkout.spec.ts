@@ -31,6 +31,7 @@ describe('Checkout', () => {
     const http = TestBed.inject(HttpTestingController);
     cart.add({
       id: 1,
+      publicId: '55883e0d-23fb-4a3e-8c96-73c2dbfcd6d7',
       name: 'Café',
       description: 'Origen',
       price: 28,

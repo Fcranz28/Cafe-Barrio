@@ -1,3 +1,4 @@
+import { MEDIA } from '../core/media';
 import { Component, ElementRef, inject, viewChild } from '@angular/core';
 import { CurrencyPipe } from '@angular/common';
 import { NavigationStart, Router, RouterLink } from '@angular/router';
@@ -14,9 +15,8 @@ import { QuantitySelector } from './quantity-selector';
       <div class="flex h-full flex-col">
         <header class="flex items-center justify-between gap-4 border-b border-line p-6">
           <div>
-            <p class="eyebrow">Tus pequeños favoritos</p>
-            <h2 id="cart-drawer-title" class="mt-2 text-3xl">Tu carrito.</h2>
-            <p class="mt-2 text-sm text-espresso/65">{{ cart.count() }} unidades</p>
+            <h2 id="cart-drawer-title" class="text-3xl">Tu carrito.</h2>
+            <p class="mt-2 text-sm text-muted">{{ cart.count() }} {{ cart.count() === 1 ? 'unidad' : 'unidades' }}</p>
           </div>
           <button type="button" autofocus aria-label="Cerrar carrito" (click)="close()"
             class="btn-outline !h-11 !w-11 !p-0 text-xl">×</button>
@@ -32,11 +32,11 @@ import { QuantitySelector } from './quantity-selector';
             <ul class="divide-y divide-line">
               @for (item of cart.items(); track item.product.id) {
                 <li class="flex gap-4 py-6">
-                  <img [src]="item.product.imageUrl || '/images/coffee.svg'"
+                  <img [src]="item.product.imageUrl  || images.productFallback"
                     [alt]="item.product.name" (error)="fallback($event)"
                     class="h-20 w-20 shrink-0 rounded-xl object-cover" />
                   <div class="min-w-0 flex-1">
-                    <a [routerLink]="['/productos', item.product.id]" (click)="close()"
+                    <a [routerLink]="item.product.publicId ? ['/productos', item.product.publicId] : ['/catalogo']" (click)="close()"
                       class="font-display text-lg">{{ item.product.name }}</a>
                     <p class="mt-1 text-sm text-coffee">{{ item.product.price | currency: 'PEN' : 'S/ ' }} por unidad</p>
                     <div class="mt-3 flex flex-wrap items-center justify-between gap-3">
@@ -69,6 +69,7 @@ import { QuantitySelector } from './quantity-selector';
   `,
 })
 export class CartDrawer {
+  readonly images = MEDIA;
   readonly cart = inject(CartService);
   private readonly panel = viewChild.required<ElementRef<HTMLDialogElement>>('panel');
 
@@ -85,6 +86,7 @@ export class CartDrawer {
   }
   fallback(event: Event) {
     const image = event.target as HTMLImageElement;
-    if (!image.src.endsWith('/images/coffee.svg')) image.src = '/images/coffee.svg';
+    image.onerror = null;
+    image.src = MEDIA.productFallback;
   }
 }

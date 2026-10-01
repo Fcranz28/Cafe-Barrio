@@ -7,6 +7,8 @@ import java.math.BigDecimal;
 @Entity @Table(name="products") @Getter @Setter @NoArgsConstructor
 public class Product {
     @Id @GeneratedValue(strategy=GenerationType.IDENTITY) private Long id;
+    @Column(name="public_id", nullable=false, unique=true, updatable=false, length=36)
+    private String publicId=java.util.UUID.randomUUID().toString();
     @Column(nullable=false, length=120) private String name;
     @Column(nullable=false, length=1500) private String description;
     @Column(nullable=false, precision=12, scale=2) private BigDecimal price;

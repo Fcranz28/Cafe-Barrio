@@ -4,7 +4,7 @@ export const routes: Routes = [
   { path: '', loadComponent: () => import('./features/home').then((m) => m.Home) },
   { path: 'catalogo', loadComponent: () => import('./features/catalog').then((m) => m.Catalog) },
   {
-    path: 'productos/:id',
+    path: 'productos/:referencia',
     loadComponent: () => import('./features/product-detail').then((m) => m.ProductDetail),
   },
   { path: 'carrito', loadComponent: () => import('./features/cart').then((m) => m.Cart) },

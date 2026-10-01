@@ -1,3 +1,4 @@
+import { MEDIA } from '../core/media';
 import { Component, inject, signal, viewChild, ElementRef } from '@angular/core';
 import { CurrencyPipe } from '@angular/common';
 import { ReactiveFormsModule, NonNullableFormBuilder, Validators } from '@angular/forms';
@@ -52,7 +53,7 @@ import { AdminNav } from '../shared/admin-nav';
                   <td class="p-4">
                     <div class="flex items-center gap-3">
                       <img
-                        [src]="p.imageUrl || '/images/coffee.svg'"
+                        [src]="p.imageUrl  || images.productFallback"
                         (error)="fallback($event)"
                         alt=""
                         class="h-12 w-12 rounded-lg object-cover"
@@ -113,14 +114,14 @@ import { AdminNav } from '../shared/admin-nav';
           <button
             type="button"
             (click)="close()"
-            [disabled]="saving()"
+            [disabled]="saving() || uploading()"
             aria-label="Cerrar formulario"
             class="h-10 w-10 text-2xl"
           >
             ×
           </button>
         </div>
-        <fieldset [disabled]="saving()">
+        <fieldset [disabled]="saving() || uploading()">
           <label class="label mt-6" for="product-name">Nombre</label
           ><input
             autofocus
@@ -168,16 +169,33 @@ import { AdminNav } from '../shared/admin-nav';
             @for (c of categories(); track c.id) {
               <option [ngValue]="c.id">{{ c.name }}</option>
             }</select
-          ><label class="label mt-4" for="product-image">Imagen URL (opcional)</label
-          ><input
-            id="product-image"
-            formControlName="imageUrl"
-            maxlength="1000"
-            class="field"
-            placeholder="https://…"
-          />
-          <p class="mt-2 text-xs text-espresso/60">
-            Usa una URL HTTPS. Si la dejas vacía, se mostrará una imagen de referencia.
+          >
+          <p class="label mt-5" id="product-image-label">Imagen del producto</p>
+          <label for="product-file"
+            class="group relative mt-2 flex h-40 w-40 cursor-pointer flex-col items-center justify-center overflow-hidden rounded-xl border border-line bg-cream transition-colors hover:border-coffee focus-within:ring-2 focus-within:ring-coffee focus-within:ring-offset-2"
+            [class.cursor-wait]="uploading()" [attr.aria-busy]="uploading()">
+            <input id="product-file" type="file" accept="image/jpeg,image/png,image/webp"
+              class="sr-only" aria-describedby="product-image-help"
+              [attr.aria-label]="form.controls.imageUrl.value ? 'Cambiar imagen del producto' : 'Subir imagen del producto'"
+              (change)="upload($event)" />
+            @if (form.controls.imageUrl.value) {
+              <img [src]="form.controls.imageUrl.value" alt="Vista previa del producto"
+                width="160" height="160" class="absolute inset-0 h-full w-full object-cover"
+                (error)="fallback($event)" />
+              <span class="absolute inset-x-0 bottom-0 flex min-h-10 items-center justify-center gap-2 bg-paper/95 px-2 text-sm font-semibold text-coffee">
+                <svg aria-hidden="true" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="m16 4 4 4M4 20l4-1 12-12a2.8 2.8 0 0 0-4-4L4 15v5Z" /></svg>
+                Cambiar imagen
+              </span>
+            } @else {
+              <svg aria-hidden="true" class="text-coffee" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M12 16V4m-4 4 4-4 4 4M4 15v4a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-4" /></svg>
+              <span class="mt-3 text-sm font-semibold text-coffee">Subir imagen</span>
+            }
+            @if (uploading()) {
+              <span class="absolute inset-0 flex items-center justify-center bg-paper/95 text-sm font-semibold text-coffee">Subiendo…</span>
+            }
+          </label>
+          <p id="product-image-help" role="status" aria-live="polite" class="mt-3 text-xs text-muted">
+            {{ uploading() ? 'Subiendo imagen. Espera un momento.' : 'JPEG, PNG o WebP · Máximo 5 MB' }}
           </p>
           <label class="mt-5 flex items-center gap-3 text-sm"
             ><input type="checkbox" formControlName="active" class="h-4 w-4 accent-coffee" />Visible
@@ -187,7 +205,7 @@ import { AdminNav } from '../shared/admin-nav';
         @if (form.touched && form.invalid) {
           <p role="alert" class="notice mt-4">
             Revisa los campos: nombre, descripción y categoría son obligatorios; precio positivo con
-            hasta dos decimales, stock entero no negativo e imagen HTTPS.
+            hasta dos decimales y stock entero no negativo.
           </p>
         }
         @if (formError()) {
@@ -199,9 +217,9 @@ import { AdminNav } from '../shared/admin-nav';
           </div>
         }
         <div class="mt-6 flex justify-end gap-3">
-          <button type="button" class="btn-outline" (click)="close()" [disabled]="saving()">
+          <button type="button" class="btn-outline" (click)="close()" [disabled]="saving() || uploading()">
             Cancelar</button
-          ><button class="btn" [disabled]="saving()">
+          ><button class="btn" [disabled]="saving() || uploading()">
             {{ saving() ? 'Guardando…' : 'Guardar producto' }}
           </button>
         </div>
@@ -210,6 +228,7 @@ import { AdminNav } from '../shared/admin-nav';
   `,
 })
 export class AdminProducts {
+  readonly images = MEDIA;
   api = inject(ApiService);
   fb = inject(NonNullableFormBuilder);
   products = signal<Product[]>([]);
@@ -222,6 +241,7 @@ export class AdminProducts {
   actionId = signal<number | null>(null);
   editingId = signal<number | undefined>(undefined);
   saving = signal(false);
+  uploading = signal(false);
   formError = signal('');
   serverFields = signal<string[]>([]);
   dialog = viewChild<ElementRef<HTMLDialogElement>>('editor');
@@ -312,14 +332,34 @@ export class AdminProducts {
     this.dialog()?.nativeElement.showModal();
   }
   close() {
-    if (!this.saving()) this.dialog()?.nativeElement.close();
+    if (!this.saving() && !this.uploading()) this.dialog()?.nativeElement.close();
   }
   cancel(e: Event) {
-    if (this.saving()) e.preventDefault();
+    if (this.saving() || this.uploading()) e.preventDefault();
+  }
+  upload(event: Event) {
+    const input = event.target as HTMLInputElement;
+    const file = input.files?.[0];
+    input.value = '';
+    if (!file || this.uploading() || this.saving()) return;
+    this.formError.set('');
+    if (!['image/jpeg', 'image/png', 'image/webp'].includes(file.type) || file.size > 5 * 1024 * 1024 || !file.size) {
+      this.formError.set('Selecciona una imagen JPEG, PNG o WebP de hasta 5 MB.');
+      return;
+    }
+    this.uploading.set(true);
+    this.api.uploadImage(file).subscribe({
+      next: (image) => {
+        this.form.controls.imageUrl.setValue(image.imageUrl);
+        this.form.controls.imageUrl.markAsDirty();
+        this.uploading.set(false);
+      },
+      error: (e) => { this.formError.set(errorMessage(e)); this.uploading.set(false); },
+    });
   }
   save() {
     this.form.markAllAsTouched();
-    if (this.form.invalid || this.saving()) return;
+    if (this.form.invalid || this.saving() || this.uploading()) return;
     this.saving.set(true);
     this.formError.set('');
     this.serverFields.set([]);
@@ -365,6 +405,6 @@ export class AdminProducts {
   fallback(e: Event) {
     const img = e.target as HTMLImageElement;
     img.onerror = null;
-    img.src = '/images/coffee.svg';
+    img.src = MEDIA.productFallback;
   }
 }

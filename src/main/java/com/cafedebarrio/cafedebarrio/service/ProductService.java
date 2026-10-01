@@ -30,6 +30,10 @@ public class ProductService {
         if(!admin && !p.isActive()) throw ApiException.missing("Producto");
         return ProductView.of(p);
     }
+    public ProductView getPublic(java.util.UUID reference) {
+        return ProductView.of(products.findByPublicIdAndActiveTrue(reference.toString())
+            .orElseThrow(() -> ApiException.missing("Producto")));
+    }
     @Transactional
     public ProductView save(Long id, ProductInput input) {
         Product p=id==null ? new Product() : products.findLocked(id).orElseThrow(() -> ApiException.missing("Producto"));

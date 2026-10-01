@@ -7,17 +7,14 @@ import { Subject, switchMap, catchError, of, tap } from 'rxjs';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 @Component({
   imports: [ProductCard],
-  template: ` <section class="container-page py-12">
-    <p class="eyebrow">La tienda del barrio</p>
-    <h1 class="mt-3 font-display text-4xl sm:text-5xl">Tu próximo favorito.</h1>
-    <p class="mt-4 max-w-lg text-sm leading-6 text-espresso/65">
+  template: ` <section class="container-page py-10 sm:py-16">
+    <h1 class="font-display text-4xl sm:text-5xl">Tu próximo favorito.</h1>
+    <p class="mt-5 max-w-lg text-base leading-7 text-muted">
       Café de origen, regalos con intención y accesorios para preparar buenos momentos.
     </p>
-    <div class="my-8 flex flex-wrap gap-2" aria-label="Filtrar por categoría">
+    <div class="my-8 flex flex-wrap gap-2 border-b border-line pb-6" role="group" aria-label="Filtrar por categoría">
       <button
-        class="btn-outline !px-5 !py-2"
-        [class.!bg-coffee]="!selected()"
-        [class.!text-white]="!selected()"
+        type="button" class="catalog-filter"
         [attr.aria-pressed]="!selected()"
         (click)="filter()"
       >
@@ -25,9 +22,7 @@ import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
       </button>
       @for (c of categories(); track c.id) {
         <button
-          class="btn-outline !px-5 !py-2"
-          [class.!bg-coffee]="selected() === c.id"
-          [class.!text-white]="selected() === c.id"
+          type="button" class="catalog-filter"
           [attr.aria-pressed]="selected() === c.id"
           (click)="filter(c.id)"
         >
@@ -47,19 +42,21 @@ import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
         <p class="mt-3 text-sm">No hay productos en esta categoría.</p>
       </div>
     } @else {
-      <p class="mb-4 text-xs text-espresso/60">{{ total() }} productos para disfrutar</p>
-      <div class="grid gap-5 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+      <p class="mb-5 text-sm text-muted" role="status">{{ total() }} productos para disfrutar</p>
+      <div class="grid gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
         @for (p of products(); track p.id) {
           <app-product-card [product]="p" />
         }
       </div>
-      <div class="mt-8 flex items-center justify-center gap-4">
+      @if (pages() > 1) {
+      <nav aria-label="Páginas del catálogo" class="mt-10 flex items-center justify-center gap-4">
         <button class="btn-outline" [disabled]="page() === 0" (click)="go(-1)">Anterior</button
         ><span class="text-sm">{{ page() + 1 }} / {{ pages() }}</span
         ><button class="btn-outline" [disabled]="page() + 1 >= pages()" (click)="go(1)">
           Siguiente
         </button>
-      </div>
+      </nav>
+      }
     }
   </section>`,
 })

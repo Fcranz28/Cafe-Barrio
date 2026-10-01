@@ -32,9 +32,10 @@ export class AuthService {
     );
   }
   logout() {
-    return this.http.post('/api/auth/logout', {}).pipe(
+    return this.api.csrf().pipe(
+      switchMap(() => this.http.post('/api/auth/logout', {})),
       tap(() => this.username.set(null)),
-      switchMap(() => this.api.csrf()),
+      switchMap(() => this.api.csrf().pipe(catchError(() => of(null)))),
     );
   }
 }

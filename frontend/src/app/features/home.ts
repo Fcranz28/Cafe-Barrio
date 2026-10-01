@@ -1,3 +1,4 @@
+import { MEDIA } from '../core/media';
 import { Component, inject, signal } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import { ApiService } from '../core/api.service';
@@ -6,16 +7,15 @@ import { ProductCard } from '../shared/product-card';
 @Component({
   imports: [RouterLink, ProductCard],
   template: `
-    <section class="relative overflow-hidden bg-[#ece1d4]">
+    <section class="relative overflow-hidden bg-sand">
       <div
-        class="container-page grid min-h-[560px] items-center gap-8 py-12 md:grid-cols-2 lg:py-16"
+        class="container-page grid items-center gap-10 py-10 md:min-h-[600px] md:grid-cols-2 md:gap-12 lg:py-16"
       >
         <div class="relative z-10 max-w-xl">
-          <p class="eyebrow">De nuestro barrio, para tu día</p>
-          <h1 class="mt-6 text-5xl leading-[1.08] tracking-tight sm:text-6xl lg:text-7xl">
+          <h1 class="text-5xl leading-[1.04] tracking-tight sm:text-6xl lg:text-7xl">
             Buen café.<br />Buenos <span class="italic text-coffee">momentos.</span>
           </h1>
-          <p class="mt-6 max-w-sm text-sm leading-7 text-espresso/70">
+          <p class="mt-7 max-w-md text-base leading-7 text-muted">
             Descubre el café de origen peruano, los regalos y los pequeños detalles que hacen
             especial lo cotidiano.
           </p>
@@ -24,26 +24,24 @@ import { ProductCard } from '../shared/product-card';
               >Explorar catálogo <span aria-hidden="true">↗</span></a
             ><a routerLink="/" fragment="historia" class="btn-outline">Conócenos</a>
           </div>
-          <div class="mt-10 flex items-center gap-3">
+          <div class="mt-8 flex items-center gap-3">
             <span class="h-px w-9 bg-coffee/40"></span
-            ><span class="text-[10px] uppercase tracking-[0.15em] text-coffee"
+            ><span class="text-xs text-coffee"
               >Un ritual que empieza con un grano</span
             >
           </div>
         </div>
         <div class="relative">
-          <div
-            class="absolute -right-8 -top-8 h-56 w-56 rounded-full border border-coffee/15"
-          ></div>
           <img
-            src="https://images.unsplash.com/photo-1495474472287-4d71bcdd2085?auto=format&fit=crop&w=1200&q=85"
+            [src]="images.hero"
             (error)="fallback($event)"
             alt="Una taza de café para disfrutar con calma"
             fetchpriority="high"
-            class="relative aspect-[5/4] w-full rounded-t-full rounded-b-[2rem] object-cover shadow-xl shadow-espresso/10"
+            width="1200" height="960"
+            class="relative aspect-[5/4] w-full rounded-t-full rounded-b-2xl object-cover"
           />
           <div
-            class="absolute -bottom-4 left-4 rounded-xl border border-line bg-paper px-5 py-4 shadow-sm"
+            class="absolute -bottom-4 left-4 rounded-xl bg-paper px-5 py-4 shadow-lg shadow-espresso/10 sm:left-6"
           >
             <span class="block font-display text-xl italic">Hecho para disfrutar.</span
             ><span class="mt-1 block text-[9px] uppercase tracking-[0.15em] text-coffee"
@@ -53,31 +51,30 @@ import { ProductCard } from '../shared/product-card';
         </div>
       </div>
     </section>
-    <section class="container-page py-14">
-      <div class="grid gap-4 sm:grid-cols-3">
+    <section aria-label="Explorar categorías" class="container-page py-8 sm:py-12">
+      <div class="grid gap-x-8 sm:grid-cols-3">
         @for (c of categories; track c.id) {
           <a
             routerLink="/catalogo"
             [queryParams]="{ categoria: c.id }"
-            class="group flex items-center justify-between rounded-2xl border border-line px-6 py-5 hover:bg-paper"
+            class="category-link group"
             ><div>
-              <p class="eyebrow">{{ c.subtitle }}</p>
-              <h2 class="mt-2 text-2xl">{{ c.name }}</h2>
+              <h2 class="text-2xl">{{ c.name }}</h2>
+              <p class="mt-2 text-sm text-muted">{{ c.subtitle }}</p>
             </div>
             <span
-              class="text-2xl text-coffee transition-transform group-hover:translate-x-1"
+              class="text-coffee"
               aria-hidden="true"
-              >↗</span
+              ><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M5 19 19 5M5 5h14v14" /></svg></span
             ></a
           >
         }
       </div>
     </section>
-    <section class="container-page pb-16">
+    <section class="container-page pb-16 sm:pb-24">
       <div class="mb-8 flex flex-wrap items-end justify-between gap-4">
         <div>
-          <p class="eyebrow">Encuentra tu favorito</p>
-          <h2 class="section-title mt-3">Pequeños placeres del barrio</h2>
+          <h2 class="section-title">Pequeños placeres del barrio</h2>
         </div>
         <a routerLink="/catalogo" class="text-sm text-coffee underline underline-offset-4"
           >Ver todo el catálogo ↗</a
@@ -97,11 +94,10 @@ import { ProductCard } from '../shared/product-card';
         </div>
       }
     </section>
-    <section id="historia" class="scroll-mt-24 bg-[#ece1d4]">
+    <section id="historia" class="scroll-mt-24 bg-sand">
       <div class="container-page grid items-center gap-10 py-16 md:grid-cols-2">
-        <div class="rounded-2xl bg-espresso p-10 text-cream">
-          <p class="eyebrow !text-caramel">Nuestra esencia</p>
-          <p class="mt-6 font-display text-4xl leading-tight">
+        <div class="rounded-2xl bg-espresso p-7 text-cream sm:p-10 lg:p-12">
+          <p class="font-display text-4xl leading-tight">
             Más que una taza.<br /><span class="italic text-caramel">Un momento para ti.</span>
           </p>
           <div class="mt-8 border-t border-cream/20 pt-5 text-xs tracking-widest">
@@ -109,14 +105,13 @@ import { ProductCard } from '../shared/product-card';
           </div>
         </div>
         <div>
-          <p class="eyebrow">Nuestra historia</p>
-          <h2 class="section-title mt-3">El café nos reúne.</h2>
-          <p class="mt-5 text-sm leading-7 text-espresso/70">
+          <h2 class="section-title">El café nos reúne.</h2>
+          <p class="mt-5 text-base leading-7 text-muted">
             Café de Barrio nace de una idea sencilla: disfrutar un buen café debería sentirse
             cercano. Por eso reunimos granos de origen peruano, accesorios para prepararlos y kits
             para compartir.
           </p>
-          <p class="mt-4 text-sm leading-7 text-espresso/70">
+          <p class="mt-4 text-base leading-7 text-muted">
             Elige tu favorito y haz de cada mañana un pequeño ritual.
           </p>
           <a routerLink="/catalogo" class="btn mt-6">Encuentra tu próximo café ↗</a>
@@ -126,6 +121,7 @@ import { ProductCard } from '../shared/product-card';
   `,
 })
 export class Home {
+  readonly images = MEDIA;
   api = inject(ApiService);
   products = signal<Product[]>([]);
   loading = signal(true);
@@ -168,6 +164,8 @@ export class Home {
     });
   }
   fallback(e: Event) {
-    (e.target as HTMLImageElement).src = '/images/hero.svg';
+    const image = e.target as HTMLImageElement;
+    image.onerror = null;
+    image.src = MEDIA.heroFallback;
   }
 }

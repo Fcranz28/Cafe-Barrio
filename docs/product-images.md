@@ -2,7 +2,7 @@
 
 Imágenes ilustrativas generadas con la herramienta integrada de ImageGen para la tienda de demostración. No son fotografías de inventario real.
 
-Se conservaron los originales generados y se guardaron copias WebP en `frontend/public/images/`, sin cambiar la composición. Cada producto tiene su propia imagen local.
+Las copias WebP se migraron a Cloudinary sin cambiar la composición. Cada producto tiene su propia fotografía remota. El manifest [cloudinary-assets.json](cloudinary-assets.json) registra los nombres originales, identificadores y URLs públicas. `V4__cloudinary_images.sql` actualiza las referencias de PostgreSQL; los archivos ya no se mantienen en `frontend/public/images`.
 
 ## Prompts utilizados
 

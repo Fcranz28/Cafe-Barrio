@@ -21,4 +21,6 @@ public class CatalogController {
         return products.list(categoria,disponible,true,page,size);
     }
     @GetMapping("/productos/{id}") public ProductView get(@PathVariable Long id) { return products.get(id,false); }
+    @GetMapping("/productos/referencia/{publicId}")
+    public ProductView getPublic(@PathVariable java.util.UUID publicId) { return products.getPublic(publicId); }
 }

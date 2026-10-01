@@ -15,6 +15,9 @@ export class ApiService {
   product(id: number) {
     return this.http.get<Product>('/api/productos/' + id);
   }
+  productReference(reference: string) {
+    return this.http.get<Product>('/api/productos/referencia/' + encodeURIComponent(reference));
+  }
   createOrder(input: OrderInput, key: string) {
     return this.http.post<Order>('/api/pedidos', input, { headers: { 'Idempotency-Key': key } });
   }
@@ -25,6 +28,11 @@ export class ApiService {
     return id
       ? this.http.put<Product>('/api/admin/productos/' + id, input)
       : this.http.post<Product>('/api/admin/productos', input);
+  }
+  uploadImage(file: File) {
+    const body = new FormData();
+    body.append('file', file);
+    return this.http.post<{ imageUrl: string; publicId: string }>('/api/admin/imagenes', body);
   }
   active(id: number, active: boolean) {
     return this.http.patch<Product>(`/api/admin/productos/${id}/activo`, { active });

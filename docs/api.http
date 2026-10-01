@@ -3,8 +3,22 @@
 @password = barrio-demo-2026
 @productId = 1
 @orderId = 2
+# Archivo local para subir desde administración (ajusta esta ruta).
+@imageFile = C:/Users/Franz/Downloads/producto.webp
 # Mantén la clave para repetir la misma compra; cambia el UUID para una compra nueva.
 @requestKey = 8c702a25-c487-4611-9950-72611d4c4e31
+
+### Subir imagen (ejecutar login y renovar CSRF antes). Copia imageUrl al guardar el producto.
+POST {{base}}/api/admin/imagenes
+X-XSRF-TOKEN: {{csrf}}
+Content-Type: multipart/form-data; boundary=ImageBoundary
+
+--ImageBoundary
+Content-Disposition: form-data; name="file"; filename="producto.webp"
+Content-Type: image/webp
+
+< {{imageFile}}
+--ImageBoundary--
 
 ### Obtener CSRF (IntelliJ HTTP Client conserva las cookies)
 GET {{base}}/api/auth/csrf

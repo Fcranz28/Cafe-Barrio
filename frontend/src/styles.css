@@ -6,6 +6,8 @@
   --color-coffee: #75452d;
   --color-caramel: #c58b57;
   --color-line: #e5d8ca;
+  --color-muted: #6c584b;
+  --color-sand: #ece1d4;
   --font-display: Georgia, 'Times New Roman', serif;
   --font-sans: 'Segoe UI', Arial, sans-serif;
 }
@@ -13,6 +15,13 @@
   body {
     @apply bg-cream text-espresso font-sans antialiased;
   }
+  html { scrollbar-gutter: stable; scroll-behavior: smooth; }
+  :focus-visible { outline: 2px solid var(--color-coffee); outline-offset: 4px; }
+  input, textarea { caret-color: var(--color-coffee); }
+  input::placeholder, textarea::placeholder { color: var(--color-muted); opacity: 1; }
+  h1, h2, h3 { text-wrap: balance; }
+  img { display: block; }
+  * { scrollbar-width: thin; scrollbar-color: var(--color-caramel) var(--color-cream); }
   h1,
   h2,
   h3 {
@@ -47,13 +56,13 @@
     @apply text-[11px] font-semibold uppercase tracking-[0.2em] text-coffee;
   }
   .btn {
-    @apply inline-flex min-h-11 items-center justify-center gap-2 rounded-full bg-coffee px-6 py-3 text-sm font-semibold text-white transition-colors hover:bg-espresso disabled:opacity-50;
+    @apply inline-flex min-h-11 items-center justify-center gap-2 rounded-full bg-coffee px-6 py-3 text-sm font-semibold text-white transition-colors hover:bg-espresso active:bg-espresso disabled:opacity-50;
   }
   .btn-outline {
     @apply inline-flex min-h-11 items-center justify-center gap-2 rounded-full border border-line bg-transparent px-6 py-3 text-sm font-semibold transition-colors hover:bg-paper disabled:opacity-50;
   }
   .field {
-    @apply w-full rounded-xl border border-line bg-paper px-4 py-3 text-sm focus:border-coffee focus:ring-1 focus:ring-coffee;
+    @apply w-full rounded-xl border border-line bg-paper px-4 py-3 text-base sm:text-sm focus:border-coffee focus:ring-1 focus:ring-coffee;
   }
   .label {
     @apply mb-2 block text-sm font-medium;
@@ -65,8 +74,15 @@
     @apply rounded-2xl border border-line bg-paper;
   }
   .section-title {
-    @apply font-display text-3xl tracking-tight md:text-4xl;
+    @apply font-display text-3xl leading-tight tracking-tight md:text-4xl;
   }
+  .text-espresso\/50, .text-espresso\/60, .text-espresso\/65, .text-espresso\/70 { color: var(--color-muted); }
+  .catalog-filter { @apply min-h-11 rounded-full border border-line px-5 py-2.5 text-sm font-medium transition-colors hover:border-coffee; }
+  .catalog-filter[aria-pressed='true'] { @apply border-coffee bg-coffee text-white; }
+  .category-link { @apply flex items-center justify-between gap-4 border-b border-line py-5 sm:py-7; }
+  .category-link:hover { @apply border-coffee; }
+  .nav-link { @apply border-b-2 border-transparent py-2 transition-colors hover:text-coffee; }
+  .nav-link[aria-current='page'] { @apply border-coffee text-coffee; }
 }
 @media (prefers-reduced-motion: reduce) {
   *,

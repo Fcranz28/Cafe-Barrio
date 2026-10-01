@@ -2,6 +2,18 @@ param([switch]$Demo, [switch]$Test)
 $ErrorActionPreference='Stop'
 $taskRoot=Split-Path $PSScriptRoot -Parent
 Set-Location $taskRoot
+# Local dotenv values, without printing secrets or overwriting explicit environment variables.
+if (Test-Path -LiteralPath (Join-Path $taskRoot '.env')) {
+    foreach ($taskLine in Get-Content -LiteralPath (Join-Path $taskRoot '.env')) {
+        if ($taskLine -match '^([A-Z_]+)=(.*)$') {
+            $taskName=$Matches[1]
+            $taskValue=$Matches[2].Trim().Trim('"').Trim("'")
+            if (-not [Environment]::GetEnvironmentVariable($taskName)) {
+                [Environment]::SetEnvironmentVariable($taskName,$taskValue,'Process')
+            }
+        }
+    }
+}
 if (-not $env:JAVA_HOME) {
     $taskJava=Get-Command java -ErrorAction SilentlyContinue
     if ($taskJava) {

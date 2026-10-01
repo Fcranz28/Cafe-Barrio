@@ -1,3 +1,4 @@
+import { MEDIA } from './media';
 import { Injectable, computed, effect, signal } from '@angular/core';
 import { Product } from './models';
 export interface CartItem {
@@ -93,7 +94,10 @@ export class CartService {
           if (ok) seen.add(p.id);
           return ok;
         })
-        .slice(0, 50);
+        .slice(0, 50)
+        .map((item: CartItem) => ({ ...item, product: { ...item.product,
+          imageUrl: MEDIA.legacyUrls[item.product.imageUrl as keyof typeof MEDIA.legacyUrls] || item.product.imageUrl,
+        } }));
     } catch {
       return [];
     }

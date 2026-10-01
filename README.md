@@ -110,7 +110,7 @@ $env:ADMIN_PASSWORD='una-clave-propia-de-al-menos-12-caracteres'
 .\scripts\backend.ps1
 ```
 
-`.env.example` documenta las variables y contiene únicamente valores de ejemplo. Puedes copiarlo con `Copy-Item .env.example .env` y completar tus valores locales. Spring Boot **no carga automáticamente** un archivo `.env`: configura las variables en la terminal como se muestra arriba, en el servidor o en la configuración de ejecución de `CafeDeBarrioApplication` en IntelliJ. El perfil `demo` sirve para una prueba local.
+`.env.example` documenta las variables y contiene únicamente valores de ejemplo. Puedes copiarlo con `Copy-Item .env.example .env` y completar tus valores locales. `scripts/backend.ps1` carga `.env` sin sobrescribir variables ya configuradas. Spring Boot **no carga directamente** `.env`: al ejecutar desde IntelliJ o Maven sin el script, configura las variables en la configuración de ejecución o terminal. El perfil `demo` sirve para una prueba local.
 
 Para subir a GitHub, incluye `.env.example` y conserva las reglas de `.gitignore`: excluyen `.env`, sus variantes locales y `src/main/resources/application-local.properties`. No reemplaces los valores de la plantilla con contraseñas reales.
 
@@ -127,9 +127,21 @@ npm start
 
 Flyway administra el esquema. `V1` crea categorías, productos, pedidos y detalles con restricciones y claves foráneas. `V2` carga tres categorías y ocho productos de demostración. Las migraciones se ejecutan una sola vez; Hibernate valida el esquema con `ddl-auto=validate`.
 
-Usa una base vacía para una instalación nueva. No se aplica un baseline automático a esquemas desconocidos. `V3` asigna fotografías ilustrativas generadas a los ocho productos, conservando las URLs personalizadas desde administración. Las imágenes están guardadas localmente en WebP; sus rutas y prompts se documentan en [docs/product-images.md](docs/product-images.md). Se pueden reemplazar desde administración con una URL HTTPS.
+Usa una base vacía para una instalación nueva. No se aplica un baseline automático a esquemas desconocidos. `V3` asigna fotografías ilustrativas a los ocho productos. `V4` reemplaza sus rutas locales por URLs HTTPS de Cloudinary sin modificar precios, stock, pedidos ni URLs externas personalizadas. Las referencias públicas están en `docs/cloudinary-assets.json`; los prompts se documentan en [docs/product-images.md](docs/product-images.md).
+
+## Imágenes con Cloudinary
+
+Todas las imágenes de la aplicación (productos, logo, portada y respaldos) se sirven desde Cloudinary. Ya no se necesita `frontend/public/images`. El campo `products.image_url` guarda la URL HTTPS; `frontend/src/app/core/media.ts` contiene las referencias del logo, portada y respaldos. Los carritos guardados antes de la migración convierten sus antiguas rutas al restaurarse.
+
+Configura `CLOUDINARY_URL` en `.env` con el formato de `.env.example`. `application.properties` centraliza las referencias a las variables de entorno, incluida `app.cloudinary.url=${CLOUDINARY_URL:}`; las credenciales reales permanecen fuera del código. Usa una API key con permiso `create` en el entorno de Cloudinary correspondiente. La clave secreta se utiliza exclusivamente en el backend y los scripts; nunca en Angular. No compartas `.env` ni pongas credenciales reales en la plantilla.
+
+En **Administración → Productos → Nuevo/Editar**, pulsa el recuadro para subir o cambiar una imagen JPEG, PNG o WebP de hasta 5 MB. El backend valida tamaño y firma del archivo, la sube a `cafe-barrio/productos` y devuelve `{ imageUrl, publicId }`. El formulario muestra la vista previa y mantiene la URL internamente; al guardar el producto se persiste en PostgreSQL. La subida requiere sesión de administrador y CSRF; no hay subida pública. No se eliminan automáticamente imágenes al reemplazarlas: pueden estar usadas por otros productos; una subida seguida de cancelar deja un archivo sin asignar en Cloudinary.
+
+La migración inicial se realizó con `node scripts/migrate-cloudinary.mjs` (Node 22+). El script lee `.env`, sube archivos de `frontend/public/images` y la portada, registra las URLs y prepara `V4`. Reanudarlo utiliza el manifest existente, evita sobrescribir archivos remotos y no cambia una migración ya generada. Reiniciar el backend aplica `V4` automáticamente. Para incorporar otras imágenes después, usa el formulario administrativo; no edites migraciones aplicadas.
 
 ## Flujo y reglas
+
+El detalle público utiliza `/productos/{publicId}`, con un UUID aleatorio y estable por producto. `V5` asigna estas referencias a los productos existentes sin cambiar IDs internos ni relaciones de pedidos. Los enlaces numéricos antiguos redirigen a la referencia pública. La API conserva el detalle numérico por compatibilidad y ofrece `GET /api/productos/referencia/{publicId}`; devuelve únicamente productos activos. El UUID evita mostrar la secuencia interna en la dirección, pero no es una credencial ni sustituye la autorización: el catálogo es público y la administración/pedidos siguen protegidos por Spring Security.
 
 - El carrito se guarda en `localStorage`; no existe una tabla de carrito.
 - El checkout recibe nombre, celular, dirección e items `{ productId, quantity }`. No recibe precios ni total.
@@ -148,7 +160,7 @@ Spring Security protege `/api/admin/**`. El administrador se configura por entor
 
 No se almacenan JWT ni contraseñas en `localStorage`. El guard de Angular facilita la navegación; el backend impone los permisos. Tras login y logout se renueva el token CSRF. Datos personales de pedidos solo se exponen al administrador.
 
-En despliegue usa HTTPS, `COOKIE_SECURE=true`, una contraseña propia y frontend/API bajo el mismo origen con proxy inverso. El perfil demo es exclusivamente local. La foto de portada se carga desde Unsplash, con una ilustración local de respaldo; el resto de las imágenes son locales. Para producción, añade límites de intentos de login/pedidos en el proxy y una gestión de usuarios persistente si necesitas varios administradores.
+En despliegue usa HTTPS, `COOKIE_SECURE=true`, una contraseña propia y frontend/API bajo el mismo origen con proxy inverso. El perfil demo es exclusivamente local. Las imágenes se sirven desde Cloudinary; la fotografía de portada proviene originalmente de Unsplash. Para producción, añade límites de intentos de login/pedidos/subidas en el proxy y una gestión de usuarios persistente si necesitas varios administradores.
 
 ## Pruebas
 
@@ -188,6 +200,7 @@ Todos los importes están expresados en PEN. Ver [docs/api.http](docs/api.http) 
 | GET | `/api/categorias` | Público |
 | GET | `/api/productos?categoria=1&disponible=true&page=0&size=12` | Público |
 | GET | `/api/productos/{id}` | Público, productos activos |
+| GET | `/api/productos/referencia/{publicId}` | Público, productos activos |
 | POST | `/api/pedidos` | Público + CSRF + Idempotency-Key |
 | GET | `/api/auth/csrf` | Público |
 | POST | `/api/auth/login` | Público + CSRF, formulario URL-encoded |
@@ -196,6 +209,7 @@ Todos los importes están expresados en PEN. Ver [docs/api.http](docs/api.http) 
 | GET / POST | `/api/admin/productos` | Administrador |
 | GET / PUT | `/api/admin/productos/{id}` | Administrador |
 | PATCH | `/api/admin/productos/{id}/activo` | Administrador |
+| POST | `/api/admin/imagenes` | Administrador + CSRF, multipart campo `file` |
 | GET | `/api/admin/pedidos?estado=PENDIENTE&page=0&size=20` | Administrador |
 | GET | `/api/admin/pedidos/{id}` | Administrador |
 | PATCH | `/api/admin/pedidos/{id}/estado` | Administrador |

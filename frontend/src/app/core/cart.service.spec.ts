@@ -1,9 +1,11 @@
 import { TestBed } from '@angular/core/testing';
 import { CartService } from './cart.service';
+import { MEDIA } from './media';
 import { Product } from './models';
 
 const product: Product = {
   id: 1,
+  publicId: '55883e0d-23fb-4a3e-8c96-73c2dbfcd6d7',
   name: 'Café',
   description: 'Origen peruano',
   price: 28.1,
@@ -46,6 +48,7 @@ describe('Carrito', () => {
     );
     const cart = TestBed.inject(CartService);
     expect(cart.items()).toHaveLength(1);
+    expect(cart.items()[0].product.imageUrl).toBe(MEDIA.legacyUrls['/images/coffee.svg']);
     expect(cart.count()).toBe(2);
   });
   it('tolera JSON inválido', () => {

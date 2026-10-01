@@ -24,7 +24,7 @@ public class SecurityConfig {
             .csrfTokenRequestHandler(new CsrfTokenRequestAttributeHandler()));
         http.authorizeHttpRequests(auth -> auth
             .requestMatchers("/api/auth/csrf", "/api/auth/login").permitAll()
-            .requestMatchers(HttpMethod.GET,"/api/productos", "/api/productos/*", "/api/categorias").permitAll()
+            .requestMatchers(HttpMethod.GET,"/api/productos", "/api/productos/*", "/api/productos/referencia/*", "/api/categorias").permitAll()
             .requestMatchers(HttpMethod.POST,"/api/pedidos").permitAll()
             .requestMatchers("/api/admin/**", "/api/auth/me", "/api/auth/logout").hasRole("ADMIN")
             .anyRequest().denyAll());

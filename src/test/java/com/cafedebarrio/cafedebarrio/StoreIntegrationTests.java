@@ -45,6 +45,29 @@ class StoreIntegrationTests {
         mvc.perform(get("/api/productos/"+productId)).andExpect(status().isNotFound());
         mvc.perform(get("/api/productos").param("page","-1")).andExpect(status().isBadRequest());
     }
+    @Test void publicReferenceIsStableUniqueAndHidesInactiveProducts() throws Exception {
+        var product = products.get(productId, true);
+        assertThat(UUID.fromString(product.publicId()).version()).isEqualTo(4);
+        assertThat(jdbc.queryForObject("SELECT COUNT(*)-COUNT(DISTINCT public_id) FROM products", Integer.class)).isZero();
+        mvc.perform(get("/api/productos/referencia/" + product.publicId()))
+            .andExpect(status().isOk()).andExpect(jsonPath("$.id").value(productId));
+        var edited = products.save(productId, new ProductInput(product.name(), product.description(), product.price(),
+            product.stock(), product.imageUrl(), product.category().id(), product.active()));
+        assertThat(edited.publicId()).isEqualTo(product.publicId());
+        mvc.perform(get("/api/productos/referencia/" + UUID.randomUUID())).andExpect(status().isNotFound());
+        mvc.perform(get("/api/productos/referencia/invalid")).andExpect(status().isBadRequest());
+        products.active(productId, false);
+        mvc.perform(get("/api/productos/referencia/" + product.publicId())).andExpect(status().isNotFound());
+        mvc.perform(get("/api/admin/productos/" + productId)).andExpect(status().isUnauthorized());
+    }
+    @Test void imageUploadRequiresAdminCsrfAndValidImage() throws Exception {
+        var file = new org.springframework.mock.web.MockMultipartFile("file", "fake.png", "image/png", "not an image".getBytes());
+        mvc.perform(multipart("/api/admin/imagenes").file(file).with(csrf())).andExpect(status().isUnauthorized());
+        mvc.perform(multipart("/api/admin/imagenes").file(file).with(user("admin").roles("ADMIN"))).andExpect(status().isForbidden());
+        mvc.perform(multipart("/api/admin/imagenes").file(file).with(user("visitor").roles("USER")).with(csrf())).andExpect(status().isForbidden());
+        mvc.perform(multipart("/api/admin/imagenes").file(file).with(user("admin").roles("ADMIN")).with(csrf()))
+            .andExpect(status().isBadRequest()).andExpect(jsonPath("$.message").value("La imagen debe ser JPEG, PNG o WebP"));
+    }
     @Test void orderUsesDatabasePricesAndSnapshot() {
         var order=service.create(input(2),key());
         assertThat(order.total()).isEqualByComparingTo("56.00");

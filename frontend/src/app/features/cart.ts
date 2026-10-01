@@ -1,3 +1,4 @@
+import { MEDIA } from '../core/media';
 import { Component, inject } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import { CurrencyPipe } from '@angular/common';
@@ -21,13 +22,13 @@ import { QuantitySelector } from '../shared/quantity-selector';
           @for (i of cart.items(); track i.product.id) {
             <div class="flex flex-wrap items-center gap-4 p-5">
               <img
-                [src]="i.product.imageUrl || '/images/coffee.svg'"
+                [src]="i.product.imageUrl  || images.productFallback"
                 (error)="fallback($event)"
                 [alt]="i.product.name"
                 class="h-20 w-20 rounded-xl object-cover"
               />
               <div class="min-w-36 flex-1">
-                <a [routerLink]="['/productos', i.product.id]" class="font-display text-lg">{{
+                <a [routerLink]="i.product.publicId ? ['/productos', i.product.publicId] : ['/catalogo']" class="font-display text-lg">{{
                   i.product.name
                 }}</a>
                 <p class="mt-1 text-xs text-espresso/65">
@@ -74,6 +75,7 @@ import { QuantitySelector } from '../shared/quantity-selector';
   </section>`,
 })
 export class Cart {
+  readonly images = MEDIA;
   cart = inject(CartService);
   private api = inject(ApiService);
   constructor() {
@@ -84,7 +86,7 @@ export class Cart {
           this.cart.items.update((items) =>
             items.map((i) =>
               i.product.id === product.id
-                ? { ...i, product: { ...i.product, imageUrl: product.imageUrl } }
+                ? { ...i, product: { ...i.product, imageUrl: product.imageUrl, publicId: product.publicId } }
                 : i,
             ),
           ),
@@ -95,6 +97,6 @@ export class Cart {
   fallback(e: Event) {
     const img = e.target as HTMLImageElement;
     img.onerror = null;
-    img.src = '/images/coffee.svg';
+    img.src = MEDIA.productFallback;
   }
 }

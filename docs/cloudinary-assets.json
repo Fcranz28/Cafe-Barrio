@@ -1,0 +1,66 @@
+{
+  "/images/blend.svg": {
+    "publicId": "cafe-barrio/blend",
+    "url": "https://res.cloudinary.com/dgj2ol5r1/image/upload/v1790865099/cafe-barrio/blend.svg"
+  },
+  "/images/ceramic-mug.webp": {
+    "publicId": "cafe-barrio/ceramic-mug",
+    "url": "https://res.cloudinary.com/dgj2ol5r1/image/upload/v1790865107/cafe-barrio/ceramic-mug.webp"
+  },
+  "/images/coffee-blend.webp": {
+    "publicId": "cafe-barrio/coffee-blend",
+    "url": "https://res.cloudinary.com/dgj2ol5r1/image/upload/v1790865107/cafe-barrio/coffee-blend.webp"
+  },
+  "/images/coffee-cajamarca.webp": {
+    "publicId": "cafe-barrio/coffee-cajamarca",
+    "url": "https://res.cloudinary.com/dgj2ol5r1/image/upload/v1790865108/cafe-barrio/coffee-cajamarca.webp"
+  },
+  "/images/coffee-cusco.webp": {
+    "publicId": "cafe-barrio/coffee-cusco",
+    "url": "https://res.cloudinary.com/dgj2ol5r1/image/upload/v1790865109/cafe-barrio/coffee-cusco.webp"
+  },
+  "/images/coffee.svg": {
+    "publicId": "cafe-barrio/coffee",
+    "url": "https://res.cloudinary.com/dgj2ol5r1/image/upload/v1790865110/cafe-barrio/coffee.svg"
+  },
+  "/images/french-press.webp": {
+    "publicId": "cafe-barrio/french-press",
+    "url": "https://res.cloudinary.com/dgj2ol5r1/image/upload/v1790865117/cafe-barrio/french-press.webp"
+  },
+  "/images/hero.svg": {
+    "publicId": "cafe-barrio/hero",
+    "url": "https://res.cloudinary.com/dgj2ol5r1/image/upload/v1790865117/cafe-barrio/hero.svg"
+  },
+  "/images/kit-compartir.webp": {
+    "publicId": "cafe-barrio/kit-compartir",
+    "url": "https://res.cloudinary.com/dgj2ol5r1/image/upload/v1790865125/cafe-barrio/kit-compartir.webp"
+  },
+  "/images/kit-ritual.webp": {
+    "publicId": "cafe-barrio/kit-ritual",
+    "url": "https://res.cloudinary.com/dgj2ol5r1/image/upload/v1790865125/cafe-barrio/kit-ritual.webp"
+  },
+  "/images/kit.svg": {
+    "publicId": "cafe-barrio/kit",
+    "url": "https://res.cloudinary.com/dgj2ol5r1/image/upload/v1790865126/cafe-barrio/kit.svg"
+  },
+  "/images/logo-cafe-rio.jpg": {
+    "publicId": "cafe-barrio/logo-cafe-rio",
+    "url": "https://res.cloudinary.com/dgj2ol5r1/image/upload/v1790865130/cafe-barrio/logo-cafe-rio.jpg"
+  },
+  "/images/manual-grinder.webp": {
+    "publicId": "cafe-barrio/manual-grinder",
+    "url": "https://res.cloudinary.com/dgj2ol5r1/image/upload/v1790865130/cafe-barrio/manual-grinder.webp"
+  },
+  "/images/mug.svg": {
+    "publicId": "cafe-barrio/mug",
+    "url": "https://res.cloudinary.com/dgj2ol5r1/image/upload/v1790865131/cafe-barrio/mug.svg"
+  },
+  "/images/press.svg": {
+    "publicId": "cafe-barrio/press",
+    "url": "https://res.cloudinary.com/dgj2ol5r1/image/upload/v1790865138/cafe-barrio/press.svg"
+  },
+  "https://images.unsplash.com/photo-1495474472287-4d71bcdd2085?auto=format&fit=crop&w=1200&q=85": {
+    "publicId": "cafe-barrio/hero-photo",
+    "url": "https://res.cloudinary.com/dgj2ol5r1/image/upload/v1790865413/cafe-barrio/hero-photo.jpg"
+  }
+}
